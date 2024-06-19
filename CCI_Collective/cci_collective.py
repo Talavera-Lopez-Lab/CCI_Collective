@@ -20,14 +20,14 @@ class cci_collective():
             raise ValueError('obs_column must be a valid column in adata.obs')
 
         raw_table = pd.read_csv('/mnt/LaCIE/ceger/Projects/CCI_Collective/CCI_Collective/binary_interaction_matrix.csv', index_col=0)
+        # Filtering the adata object and interaction matrix for shared genes
         genes_to_keep = np.intersect1d(self.adata.var_names, raw_table.index)
         filtered_table = raw_table.loc[genes_to_keep, genes_to_keep]
         self.binary_interaction_matrix = filtered_table
-
         self.filtered_adata = self.adata[:, genes_to_keep]
 
+        # getting expression values of cell_clusters
         clusters = self.adata.obs[obs_column].unique()
-
         cluster_exp_dict = {}
         for cluster in clusters:
             cluster_exp_dict[cluster] = collapse_matrix(
@@ -35,7 +35,6 @@ class cci_collective():
             )
 
         feature_values = []
-
         for cell in tqdm(self.filtered_adata.obs_names):
             cell_exp_array = self.filtered_adata[self.filtered_adata.obs_names == cell].X.toarray().flatten()
 
